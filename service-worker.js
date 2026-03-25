@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leetsrs-v1';
+const CACHE_NAME = 'leetsrs-v2';
 const BASE_PATH = '/leetsrs_pwa';
 const STATIC_ASSETS = [
   `${BASE_PATH}/`,

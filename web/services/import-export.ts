@@ -104,16 +104,21 @@ export async function importData(jsonData: string): Promise<void> {
     throw new Error('Invalid export data structure');
   }
   
+  // Handle plugin format compatibility - plugin may use 'cardMap' instead of 'cards'
+  const cardsData = data.data.cards || (data.data as any).cardMap;
+  const statsData = data.data.stats || (data.data as any).dailyStats;
+  const notesData = data.data.notes || (data.data as any).noteMap || {};
+  
   // Validate data types
-  if (typeof data.data.cards !== 'object' || data.data.cards === null) {
+  if (typeof cardsData !== 'object' || cardsData === null) {
     throw new Error('Invalid cards data');
   }
   
-  if (typeof data.data.stats !== 'object' || data.data.stats === null) {
+  if (typeof statsData !== 'object' || statsData === null) {
     throw new Error('Invalid stats data');
   }
   
-  if (typeof data.data.notes !== 'object' || data.data.notes === null) {
+  if (typeof notesData !== 'object' || notesData === null) {
     throw new Error('Invalid notes data');
   }
   
@@ -128,16 +133,16 @@ export async function importData(jsonData: string): Promise<void> {
     await storage.setItem(STORAGE_KEYS.githubPat, existingPat);
   }
   
-  // Import cards
-  await storage.setItem(STORAGE_KEYS.cards, data.data.cards);
+  // Import cards (handle both 'cards' and 'cardMap' from plugin)
+  await storage.setItem(STORAGE_KEYS.cards, cardsData);
   
-  // Import stats (extension format: local:leetsrs:stats)
-  if (data.data.stats && Object.keys(data.data.stats).length > 0) {
-    await storage.setItem(STORAGE_KEYS.stats, data.data.stats);
+  // Import stats (handle both 'stats' and 'dailyStats' from plugin)
+  if (statsData && Object.keys(statsData).length > 0) {
+    await storage.setItem(STORAGE_KEYS.stats, statsData);
   }
   
   // Import notes - 兼容插件版本的存储格式（每个 note 单独存储）
-  for (const [cardId, note] of Object.entries(data.data.notes)) {
+  for (const [cardId, note] of Object.entries(notesData)) {
     const key = `${STORAGE_KEYS.notes}:${cardId}`;
     await storage.setItem(key, note);
   }
@@ -191,8 +196,9 @@ export async function resetAllData(): Promise<void> {
   // Remove all data except PAT
   const existingPat = await storage.getItem<string>(STORAGE_KEYS.githubPat);
   
+  // Clear all leetsrs-related keys (both old web prefix and new unified prefix)
   Object.keys(localStorage)
-    .filter(key => key.startsWith('leetsrs_web_'))
+    .filter(key => key.startsWith('leetsrs_web_') || key.startsWith('local:leetsrs:') || key.startsWith('sync:leetsrs:'))
     .forEach(key => localStorage.removeItem(key));
     
   // Restore PAT
