@@ -1,25 +1,29 @@
-// Storage keys for web version
+// Storage keys - unified with extension version format
+// Using 'local:leetsrs:' prefix for data, 'sync:leetsrs:' for sync settings
 export const STORAGE_KEYS = {
-  // Data keys
-  cards: 'leetsrs_web_cards',
-  stats: 'leetsrs_web_stats',
-  monthlyStats: 'leetsrs_web_monthly_stats',
-  notes: 'leetsrs_web_notes',
+  // Data keys (local:leetsrs: prefix)
+  cards: 'local:leetsrs:cards',
+  stats: 'local:leetsrs:stats',
+  notes: 'local:leetsrs:notes',
   
-  // Settings keys
-  maxNewCardsPerDay: 'leetsrs_web_max_new_cards',
-  dayStartHour: 'leetsrs_web_day_start_hour',
-  animationsEnabled: 'leetsrs_web_animations_enabled',
-  theme: 'leetsrs_web_theme',
-  autoClearLeetcode: 'leetsrs_web_auto_clear_leetcode',
-  badgeEnabled: 'leetsrs_web_badge_enabled',
-  language: 'leetsrs_web_language',
+  // Settings keys (sync:leetsrs: prefix for cross-device sync)
+  maxNewCardsPerDay: 'sync:leetsrs:maxNewCardsPerDay',
+  dayStartHour: 'sync:leetsrs:dayStartHour',
+  animationsEnabled: 'sync:leetsrs:animationsEnabled',
+  theme: 'sync:leetsrs:theme',
+  autoClearLeetcode: 'sync:leetsrs:autoClearLeetcode',
+  badgeEnabled: 'sync:leetsrs:badgeEnabled',
+  language: 'sync:leetsrs:language',
   
-  // Gist sync keys
-  githubPat: 'leetsrs_web_github_pat',
-  gistId: 'leetsrs_web_gist_id',
-  gistSyncEnabled: 'leetsrs_web_gist_sync_enabled',
-  lastSyncTime: 'leetsrs_web_last_sync_time',
-  lastSyncDirection: 'leetsrs_web_last_sync_direction',
-  dataUpdatedAt: 'leetsrs_web_data_updated_at',
+  // Gist sync keys (sync:leetsrs: prefix)
+  githubPat: 'sync:leetsrs:githubPat',
+  gistId: 'sync:leetsrs:gistId',
+  gistSyncEnabled: 'sync:leetsrs:gistSyncEnabled',
+  lastSyncTime: 'local:leetsrs:lastSyncTime',
+  lastSyncDirection: 'local:leetsrs:lastSyncDirection',
+  dataUpdatedAt: 'local:leetsrs:dataUpdatedAt',
 } as const;
+
+export function getNoteStorageKey(cardId: string): `local:leetsrs:notes:${string}` {
+  return `${STORAGE_KEYS.notes}:${cardId}`;
+}

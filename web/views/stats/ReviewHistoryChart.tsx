@@ -18,22 +18,22 @@ export function ReviewHistoryChart() {
     datasets: [
       {
         label: t.ratings.again,
-        data: last30DaysStats?.map((stat) => stat.ratingDistribution.again) || [],
+        data: last30DaysStats?.map((stat) => stat.gradeBreakdown?.[1] ?? 0) || [],
         backgroundColor: '#ef4444',
       },
       {
         label: t.ratings.hard,
-        data: last30DaysStats?.map((stat) => stat.ratingDistribution.hard) || [],
+        data: last30DaysStats?.map((stat) => stat.gradeBreakdown?.[2] ?? 0) || [],
         backgroundColor: '#f59e0b',
       },
       {
         label: t.ratings.good,
-        data: last30DaysStats?.map((stat) => stat.ratingDistribution.good) || [],
+        data: last30DaysStats?.map((stat) => stat.gradeBreakdown?.[3] ?? 0) || [],
         backgroundColor: '#10b981',
       },
       {
         label: t.ratings.easy,
-        data: last30DaysStats?.map((stat) => stat.ratingDistribution.easy) || [],
+        data: last30DaysStats?.map((stat) => stat.gradeBreakdown?.[4] ?? 0) || [],
         backgroundColor: '#3b82f6',
       },
     ],

@@ -3,6 +3,7 @@ import { STORAGE_KEYS } from './storage-keys';
 import type { Card } from '../shared/cards';
 import type { Note } from '../shared/notes';
 import type { Theme, Language } from '../shared/settings';
+import type { DailyStats } from '../shared/stats';
 
 const SCHEMA_VERSION = 1;
 const GIST_FILENAME = 'leetsrs-backup.json';
@@ -13,8 +14,7 @@ export interface ExportData {
   dataUpdatedAt?: string;
   data: {
     cards: Record<string, Card>;
-    stats: Record<string, unknown>;
-    monthlyStats?: Record<string, unknown>;
+    stats: Record<string, DailyStats>;
     notes: Record<string, Note>;
     settings: {
       maxNewCardsPerDay?: number;
@@ -33,10 +33,9 @@ export interface ExportData {
 }
 
 export async function exportData(): Promise<string> {
-  // Gather all data from storage
+  // Gather all data from storage (using extension-compatible keys)
   const cards = (await storage.getItem<Record<string, Card>>(STORAGE_KEYS.cards)) ?? {};
-  const stats = (await storage.getItem<Record<string, unknown>>(STORAGE_KEYS.stats)) ?? {};
-  const monthlyStats = (await storage.getItem<Record<string, unknown>>(STORAGE_KEYS.monthlyStats)) ?? {};
+  const stats = (await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats)) ?? {};
   
   // Get all notes - 兼容插件版本的存储格式（每个 note 单独存储）
   const notes: Record<string, Note> = {};
@@ -71,7 +70,6 @@ export async function exportData(): Promise<string> {
     data: {
       cards,
       stats,
-      ...(Object.keys(monthlyStats).length > 0 && { monthlyStats }),
       notes,
       settings: {
         ...(maxNewCardsPerDay != null && { maxNewCardsPerDay }),
@@ -133,12 +131,9 @@ export async function importData(jsonData: string): Promise<void> {
   // Import cards
   await storage.setItem(STORAGE_KEYS.cards, data.data.cards);
   
-  // Import stats
-  await storage.setItem(STORAGE_KEYS.stats, data.data.stats);
-  
-  // Import monthly stats
-  if (data.data.monthlyStats) {
-    await storage.setItem(STORAGE_KEYS.monthlyStats, data.data.monthlyStats);
+  // Import stats (extension format: local:leetsrs:stats)
+  if (data.data.stats && Object.keys(data.data.stats).length > 0) {
+    await storage.setItem(STORAGE_KEYS.stats, data.data.stats);
   }
   
   // Import notes - 兼容插件版本的存储格式（每个 note 单独存储）
