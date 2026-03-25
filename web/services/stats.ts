@@ -148,9 +148,32 @@ async function getDayStartHour(): Promise<number> {
   return getDayStartHour();
 }
 
+// Try multiple possible storage keys for compatibility with extension
+// Extension might use different keys than web version
 async function getMonthlyStats(): Promise<Record<string, DailyStats>> {
-  const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.monthlyStats);
-  return stats ?? {};
+  // Try web version key first
+  let stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.monthlyStats);
+  if (stats && Object.keys(stats).length > 0) {
+    return stats;
+  }
+  
+  // Try extension version keys (possible formats)
+  const possibleKeys = [
+    'leetsrs:monthlyStats',
+    'local:leetsrs:monthlyStats',
+    'monthlyStats',
+  ];
+  
+  for (const key of possibleKeys) {
+    stats = await storage.getItem<Record<string, DailyStats>>(key);
+    if (stats && Object.keys(stats).length > 0) {
+      // Migrate to web key for future use
+      await storage.setItem(STORAGE_KEYS.monthlyStats, stats);
+      return stats;
+    }
+  }
+  
+  return {};
 }
 
 async function saveMonthlyStats(stats: Record<string, DailyStats>): Promise<void> {

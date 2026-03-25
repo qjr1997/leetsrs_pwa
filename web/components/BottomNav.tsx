@@ -1,6 +1,7 @@
 import { IconType } from 'react-icons';
 import { MdHome, MdStyle, MdBarChart, MdSettings } from 'react-icons/md';
 import { useI18n } from '../contexts/I18nContext';
+import { useReviewQueueQuery } from '../hooks/useQueries';
 
 export type ViewId = 'home' | 'card' | 'stats' | 'settings';
 
@@ -24,12 +25,17 @@ interface BottomNavProps {
 
 export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
   const t = useI18n();
+  const { data: reviewQueue = [] } = useReviewQueueQuery();
+  
+  // Calculate total due cards for badge
+  const dueCount = reviewQueue.length;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-[60px] bg-secondary border-t border-theme flex items-center justify-around px-4 z-50">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeView === item.id;
+        const isHome = item.id === 'home';
         
         return (
           <button
@@ -39,7 +45,15 @@ export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
               isActive ? 'text-accent' : 'text-secondary'
             }`}
           >
-            <Icon className="w-6 h-6" />
+            <div className="relative">
+              <Icon className="w-6 h-6" />
+              {/* Show badge on Home icon when there are due cards */}
+              {isHome && dueCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full">
+                  {dueCount > 99 ? '99+' : dueCount}
+                </span>
+              )}
+            </div>
             <span className="text-xs mt-1">{t.nav[item.labelKey]}</span>
           </button>
         );
