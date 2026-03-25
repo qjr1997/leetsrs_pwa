@@ -1,8 +1,8 @@
 # LeetSRS PWA
 
-A Progressive Web App (PWA) version of [LeetSRS](https://github.com/matthewdmdrake/LeetSRS) - a spaced repetition system for LeetCode problems.
+A Progressive Web App (PWA) version of [LeetSRS](https://github.com/mattcdrake/leetsrs) - a spaced repetition system for LeetCode problems.
 
-> **Note**: This is a community port of the original LeetSRS browser extension. All credit for the original concept and implementation goes to [Matt Drake](https://github.com/matthewdmdrake).
+> **Note**: This is a community port of the original LeetSRS browser extension. All credit for the original concept and implementation goes to [Matt Drake](https://github.com/mattcdrake).
 
 ## Features
 
@@ -27,7 +27,7 @@ Visit: https://qjr1997.github.io/leetsrs_pwa/
 ## About This Fork
 
 This PWA was created by porting the original LeetSRS browser extension to work as a standalone web application. The original extension can be found at:
-- **Original Repository**: https://github.com/matthewdmdrake/LeetSRS
+- **Original Repository**: https://github.com/mattcdrake/leetsrs
 - **Original Author**: Matt Drake
 
 ## Tech Stack
