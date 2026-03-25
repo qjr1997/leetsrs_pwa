@@ -1,0 +1,166 @@
+import { useState, useRef, useEffect } from 'react';
+import { ReviewCard } from './ReviewCard';
+import { NotesSection } from './NotesSection';
+import { ActionsSection } from './ActionsSection';
+import {
+  useReviewQueueQuery,
+  useRateCardMutation,
+  useRemoveCardMutation,
+  useDelayCardMutation,
+  usePauseCardMutation,
+  useAnimationsEnabledQuery,
+} from '../../hooks/useQueries';
+import type { Grade } from 'ts-fsrs';
+import { useI18n } from '../../contexts/I18nContext';
+import type { Card } from '../../shared/cards';
+
+export function ReviewQueue() {
+  const t = useI18n();
+  const { data: animationsEnabled = true } = useAnimationsEnabledQuery();
+  const { data: queue = [], isLoading, error } = useReviewQueueQuery({ refetchOnWindowFocus: true });
+  const rateCardMutation = useRateCardMutation();
+  const removeCardMutation = useRemoveCardMutation();
+  const delayCardMutation = useDelayCardMutation();
+  const pauseCardMutation = usePauseCardMutation();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+  const [animatingCard, setAnimatingCard] = useState<Card | null>(null);
+  const animationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (animationTimerRef.current) clearTimeout(animationTimerRef.current);
+    };
+  }, []);
+
+  const handleCardAction = async <T,>(
+    action: () => Promise<T>,
+    options: {
+      getSlideDirection?: (result: T) => 'left' | 'right' | null;
+      errorMessage: string;
+    }
+  ) => {
+    if (queue.length === 0 || isProcessing) return;
+
+    setAnimatingCard(queue[0]);
+    setIsProcessing(true);
+
+    try {
+      const result = await action();
+
+      if (animationsEnabled && options.getSlideDirection) {
+        const direction = options.getSlideDirection(result);
+        if (direction) setSlideDirection(direction);
+      }
+
+      const animationDelay = animationsEnabled ? 400 : 0;
+      animationTimerRef.current = setTimeout(() => {
+        animationTimerRef.current = null;
+        setSlideDirection(null);
+        setIsProcessing(false);
+        setAnimatingCard(null);
+      }, animationDelay);
+    } catch (error) {
+      console.error(options.errorMessage, error);
+      setSlideDirection(null);
+      setIsProcessing(false);
+      setAnimatingCard(null);
+    }
+  };
+
+  const handleRating = async (rating: Grade) => {
+    const currentCard = queue[0];
+    await handleCardAction(
+      () =>
+        rateCardMutation.mutateAsync({
+          slug: currentCard.slug,
+          name: currentCard.name,
+          rating,
+          leetcodeId: currentCard.leetcodeId,
+          difficulty: currentCard.difficulty,
+          domain: currentCard.domain,
+        }),
+      {
+        getSlideDirection: (result) => (result.shouldRequeue ? 'left' : 'right'),
+        errorMessage: 'Failed to rate card:',
+      }
+    );
+  };
+
+  const handleDelete = async () => {
+    const currentCard = queue[0];
+    await handleCardAction(() => removeCardMutation.mutateAsync(currentCard.slug), {
+      getSlideDirection: () => 'left',
+      errorMessage: 'Failed to delete card:',
+    });
+  };
+
+  const handleDelay = async (days: number) => {
+    const currentCard = queue[0];
+    await handleCardAction(() => delayCardMutation.mutateAsync({ slug: currentCard.slug, days }), {
+      getSlideDirection: () => 'right',
+      errorMessage: 'Failed to delay card:',
+    });
+  };
+
+  const handlePause = async () => {
+    const currentCard = queue[0];
+    await handleCardAction(() => pauseCardMutation.mutateAsync({ slug: currentCard.slug, paused: true }), {
+      getSlideDirection: () => 'right',
+      errorMessage: 'Failed to pause card:',
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-secondary">{t.home.loadingReviewQueue}</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-red-500">{t.errors.failedToLoadReviewQueue}</div>
+      </div>
+    );
+  }
+
+  const currentCard = animatingCard ?? queue[0];
+
+  if (!currentCard) {
+    return (
+      <div className="flex flex-col items-center justify-center h-32 gap-3 px-4">
+        <div className="text-xl font-semibold text-primary">{t.home.noCardsToReview}</div>
+        <div className="text-base text-secondary text-center">
+          {t.home.addProblemsInstructions}
+        </div>
+      </div>
+    );
+  }
+
+  const getAnimationClass = () => {
+    if (!animationsEnabled) return '';
+
+    const baseClasses = 'transition-all duration-300 ease-out';
+
+    if (slideDirection === 'left') {
+      return `${baseClasses} -translate-x-full opacity-0`;
+    }
+    if (slideDirection === 'right') {
+      return `${baseClasses} translate-x-full opacity-0`;
+    }
+    return `${baseClasses} opacity-100 translate-x-0`;
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className={getAnimationClass()}>
+        <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
+      </div>
+      <NotesSection cardId={currentCard.id} />
+      <ActionsSection onDelete={handleDelete} onDelay={handleDelay} onPause={handlePause} />
+    </div>
+  );
+}
