@@ -1,6 +1,8 @@
 # LeetSRS PWA
 
-A spaced repetition system (SRS) for LeetCode problems - now available as a Progressive Web App!
+A Progressive Web App (PWA) version of [LeetSRS](https://github.com/matthewdmdrake/LeetSRS) - a spaced repetition system for LeetCode problems.
+
+> **Note**: This is a community port of the original LeetSRS browser extension. All credit for the original concept and implementation goes to [Matt Drake](https://github.com/matthewdmdrake).
 
 ## Features
 
@@ -22,9 +24,14 @@ Visit: https://qjr1997.github.io/leetsrs_pwa/
 - **Import**: Restore from a previous backup
 - **GitHub Gist Sync**: Automatically sync across browsers
 
-## Development
+## About This Fork
 
-This PWA is built with:
+This PWA was created by porting the original LeetSRS browser extension to work as a standalone web application. The original extension can be found at:
+- **Original Repository**: https://github.com/matthewdmdrake/LeetSRS
+- **Original Author**: Matt Drake
+
+## Tech Stack
+
 - React + TypeScript
 - Vite
 - Tailwind CSS
@@ -32,6 +39,8 @@ This PWA is built with:
 - Chart.js
 - ts-fsrs (FSRS algorithm)
 
-## Credits
+## License
 
-Based on the LeetSRS browser extension by Matt Drake.
+This project is licensed under the [MIT License](./LICENSE.md).
+
+Copyright 2026 Matthew Drake (original LeetSRS)
