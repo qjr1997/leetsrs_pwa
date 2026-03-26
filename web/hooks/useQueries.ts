@@ -333,10 +333,10 @@ export function useExportDataMutation() {
   return useMutation({
     mutationFn: async () => {
       const data = {
-        cards: localStorage.getItem('leetsrs_web_cards'),
-        stats: localStorage.getItem('leetsrs_web_stats'),
-        notes: localStorage.getItem('leetsrs_web_notes'),
-        settings: localStorage.getItem('leetsrs_web_settings'),
+        cards: localStorage.getItem('local:leetsrs:cards'),
+        stats: localStorage.getItem('local:leetsrs:stats'),
+        notes: localStorage.getItem('local:leetsrs:notes'),
+        settings: localStorage.getItem('sync:leetsrs:settings'),
       };
       return JSON.stringify(data);
     },
@@ -348,10 +348,10 @@ export function useImportDataMutation() {
   return useMutation({
     mutationFn: async (jsonData: string) => {
       const data = JSON.parse(jsonData);
-      if (data.cards) localStorage.setItem('leetsrs_web_cards', data.cards);
-      if (data.stats) localStorage.setItem('leetsrs_web_stats', data.stats);
-      if (data.notes) localStorage.setItem('leetsrs_web_notes', data.notes);
-      if (data.settings) localStorage.setItem('leetsrs_web_settings', data.settings);
+      if (data.cards) localStorage.setItem('local:leetsrs:cards', data.cards);
+      if (data.stats) localStorage.setItem('local:leetsrs:stats', data.stats);
+      if (data.notes) localStorage.setItem('local:leetsrs:notes', data.notes);
+      if (data.settings) localStorage.setItem('sync:leetsrs:settings', data.settings);
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
@@ -364,15 +364,15 @@ export function useResetAllDataMutation() {
   return useMutation({
     mutationFn: async () => {
       // Preserve PAT before reset (it's not in export for security)
-      const existingPat = localStorage.getItem('leetsrs_web_github_pat');
+      const existingPat = localStorage.getItem('sync:leetsrs:githubPat');
       
       Object.keys(localStorage)
-        .filter(key => key.startsWith('leetsrs_web_'))
+        .filter(key => key.startsWith('local:leetsrs:') || key.startsWith('sync:leetsrs:'))
         .forEach(key => localStorage.removeItem(key));
         
       // Restore PAT if it existed
       if (existingPat) {
-        localStorage.setItem('leetsrs_web_github_pat', existingPat);
+        localStorage.setItem('sync:leetsrs:githubPat', existingPat);
       }
     },
     onSuccess: () => {
