@@ -5,26 +5,29 @@ import type { Note } from '../shared/notes';
 import type { Theme, Language } from '../shared/settings';
 import type { GistSyncConfig, GistSyncStatus } from '../shared/gist-sync';
 
-const STORAGE_PREFIX = 'leetsrs_web_';
+// Unified storage keys - compatible with browser extension
+// Extension uses local:leetsrs: prefix for local data and sync:leetsrs: for sync data
 
 export const STORAGE_KEYS = {
-  cards: `${STORAGE_PREFIX}cards`,
-  stats: `${STORAGE_PREFIX}stats`,
-  monthlyStats: `${STORAGE_PREFIX}monthlyStats`,
-  notes: `${STORAGE_PREFIX}notes`,
-  maxNewCardsPerDay: `${STORAGE_PREFIX}maxNewCardsPerDay`,
-  dayStartHour: `${STORAGE_PREFIX}dayStartHour`,
-  animationsEnabled: `${STORAGE_PREFIX}animationsEnabled`,
-  theme: `${STORAGE_PREFIX}theme`,
-  autoClearLeetcode: `${STORAGE_PREFIX}autoClearLeetcode`,
-  badgeEnabled: `${STORAGE_PREFIX}badgeEnabled`,
-  language: `${STORAGE_PREFIX}language`,
-  dataUpdatedAt: `${STORAGE_PREFIX}dataUpdatedAt`,
-  githubPat: `${STORAGE_PREFIX}githubPat`,
-  gistId: `${STORAGE_PREFIX}gistId`,
-  gistSyncEnabled: `${STORAGE_PREFIX}gistSyncEnabled`,
-  lastSyncTime: `${STORAGE_PREFIX}lastSyncTime`,
-  lastSyncDirection: `${STORAGE_PREFIX}lastSyncDirection`,
+  // Local data (synced via Gist)
+  cards: 'local:leetsrs:cards',
+  stats: 'local:leetsrs:stats',
+  notes: 'local:leetsrs:notes',
+  dataUpdatedAt: 'local:leetsrs:dataUpdatedAt',
+  lastSyncTime: 'local:leetsrs:lastSyncTime',
+  lastSyncDirection: 'local:leetsrs:lastSyncDirection',
+  
+  // Sync data (settings that sync across devices)
+  maxNewCardsPerDay: 'sync:leetsrs:maxNewCardsPerDay',
+  dayStartHour: 'sync:leetsrs:dayStartHour',
+  animationsEnabled: 'sync:leetsrs:animationsEnabled',
+  theme: 'sync:leetsrs:theme',
+  autoClearLeetcode: 'sync:leetsrs:autoClearLeetcode',
+  badgeEnabled: 'sync:leetsrs:badgeEnabled',
+  language: 'sync:leetsrs:language',
+  githubPat: 'sync:leetsrs:githubPat',
+  gistId: 'sync:leetsrs:gistId',
+  gistSyncEnabled: 'sync:leetsrs:gistSyncEnabled',
 } as const;
 
 export function getNoteStorageKey(cardId: string): string {
